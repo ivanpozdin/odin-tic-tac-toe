@@ -5,7 +5,7 @@ class GameBoard {
   #board = Array(9).fill(null);
   #cells = [];
   #freeCells = 9;
-
+  #restartButton = document.querySelector("#restart-btn");
   #title = document.querySelector("#title");
 
   #currentPlayer = PLAYER_A;
@@ -14,6 +14,19 @@ class GameBoard {
       this.#cells.push(document.querySelector(`.cell-${i}`));
     }
     this.#addMoveHandlers();
+    this.#handleRestart();
+  }
+
+  #handleRestart() {
+    this.#restartButton.addEventListener("click", (e) => {
+      this.#board = Array(9).fill(null);
+      this.#freeCells = 9;
+      this.#cells.forEach((cell) => {
+        cell.textContent = "";
+      });
+      this.#title.textContent = "TIC TAC TOE";
+      this.#currentPlayer = PLAYER_A;
+    });
   }
 
   #addMoveHandlers() {
@@ -24,10 +37,20 @@ class GameBoard {
         }
         cell.textContent = this.#currentPlayer;
         this.#board[cell.dataset.cellNumber] = this.#currentPlayer;
-        if (this.isGameOver(this.#board)) {
-          this.#title.textContent = "GAME OVER";
-        }
         this.#freeCells--;
+        if (this.#isGameOver(this.#board)) {
+          if (this.#isTie()) {
+            this.#title.textContent = "TIE";
+          } else {
+            if (this.#currentPlayer === PLAYER_A) {
+              this.#title.textContent = `Player A WON`;
+            } else {
+              this.#title.textContent = `Player B WON`;
+            }
+          }
+          // this.#title.textContent = "GAME OVER";
+        }
+
         this.#changePlayer();
       })
     );
@@ -37,13 +60,17 @@ class GameBoard {
       this.#currentPlayer === PLAYER_A ? PLAYER_B : PLAYER_A;
   }
 
-  isGameOver(board) {
+  #isGameOver(board) {
     return (
       this.#freeCells === 0 ||
       this.#doHave3InColumns(this.#board) ||
       this.#doHave3InRows(this.#board) ||
       this.#doHave3InDiagonals(this.#board)
     );
+  }
+
+  #isTie() {
+    return this.#freeCells === 0;
   }
 
   #doHave3InRows(board) {
