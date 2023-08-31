@@ -10,7 +10,9 @@
   <body>
     <div class="wrapper">
       <h1 id="title">TIC TAC TOE</h1>
-      <div class="score-player-a">player A:</div>
+      <div class="score-player-a-container">
+        player A: <span id="score-player-a">0</span>
+      </div>
       <div class="board">
         <button data-cell-number="0" class="cell-0"></button>
         <button data-cell-number="1" class="cell-1"></button>
@@ -22,7 +24,13 @@
         <button data-cell-number="7" class="cell-7"></button>
         <button data-cell-number="8" class="cell-8"></button>
       </div>
-      <div class="score-player-b">player B:</div>
+      <div class="score-player-b-container">
+        player B: <span id="score-player-b">0</span>
+      </div>
+      <h2 id="round-number-container">
+        ROUND: <span id="round-number">1</span>
+      </h2>
+      <button id="next-round-btn" class="hidden">NEXT ROUND</button>
       <button id="restart-btn">RESTART</button>
       <div class="start-window">
         <h1>TIC TAC TOE</h1>
