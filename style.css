@@ -82,3 +82,31 @@
   grid-row-start: 3;
   grid-column-start: 3;
 }
+
+.hidden {
+  visibility: hidden;
+}
+
+.start-window {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  background-color: aliceblue;
+  display: grid;
+  grid-template: auto auto auto / auto;
+  justify-content: center;
+  align-content: center;
+}
+.start-window em {
+  color: red;
+}
+
+.start-window h1 {
+  grid-area: 1/1;
+}
+.start-window h2 {
+  grid-area: 2/1;
+}
+.start-window #start-game-btn {
+  grid-area: 3/1;
+}

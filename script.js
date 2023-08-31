@@ -15,6 +15,7 @@ class GameBoard {
     }
     this.#addMoveHandlers();
     this.#handleRestart();
+    this.#startHandle();
   }
 
   #handleRestart() {
@@ -99,6 +100,12 @@ class GameBoard {
       }
     }
     return null;
+  }
+
+  #startHandle() {
+    document.querySelector("#start-game-btn").addEventListener("click", (e) => {
+      document.querySelector(".start-window").classList.add("hidden");
+    });
   }
 }
 
