@@ -5,10 +5,10 @@ const CELLS_NUMBER = 9;
 const INFINITY = 10000;
 
 const GAME_MODE = {
-  AI_VS_PLAYER: 1,
+  AI_VS_HUMAN: 1,
   AI_VS_AI: 2,
-  PLAYER_VS_AI: 3,
-  PLAYER_VS_PLAYER: 4,
+  HUMAN_VS_AI: 3,
+  HUMAN_VS_HUMAN: 4,
 };
 
 class Player {
@@ -106,7 +106,6 @@ class GameBoard {
         if (cell.textContent || this.#gameOver || this.#roundOver) {
           return;
         }
-        console.log(this.#gameMode);
         cell.textContent = this.#currentPlayer.symbol;
         this.#board[cell.dataset.cellNumber] = this.#currentPlayer;
         this.#freeCells--;
@@ -123,6 +122,36 @@ class GameBoard {
               ? "TIE"
               : `${this.#currentPlayer.name} WON`;
           }
+          this.#changePlayer();
+          return;
+        }
+        this.#changePlayer();
+        if (!this.#gameMode === GAME_MODE.HUMAN_VS_AI) return;
+
+        const { index: aiMoveIndex } = this.#minimax(
+          this.#board,
+          this.#playerB,
+          this.#playerA,
+          this.#playerB
+        );
+        this.#board[aiMoveIndex] = this.#playerB;
+        this.#cells[aiMoveIndex].textContent = this.#playerB.symbol;
+        this.#freeCells--;
+        if (this.#isRoundOver(this.#board)) {
+          this.#nextRoundButton.classList.remove("hidden");
+          this.#roundOver = true;
+          this.#roundsNumber++;
+
+          if (!this.#isTie()) this.#currentPlayer.increaseScore();
+          this.#showScores();
+          if (this.#isGameOverSituation()) {
+            this.#nextRoundButton.classList.add("hidden");
+            this.#title.textContent = this.#isTie()
+              ? "TIE"
+              : `${this.#currentPlayer.name} WON`;
+          }
+          this.#changePlayer();
+          return;
         }
         this.#changePlayer();
       })
@@ -163,7 +192,7 @@ class GameBoard {
   }
 
   #doHave3InRows(board) {
-    for (let i = 0; i <= 6; i += 2) {
+    for (let i = 0; i <= 6; i += 3) {
       if (board[i] === board[i + 1] && board[i] === board[i + 2]) {
         return board[i];
       }
@@ -199,9 +228,9 @@ class GameBoard {
         document.querySelector(".start-window").classList.add("hidden");
         const playerA = document.getElementById("player-a-select").value;
         const playerB = document.getElementById("player-b-select").value;
-        console.log(playerA, playerB);
+
         if (playerA === "ai" && playerB === "human") {
-          this.#gameMode = GAME_MODE.AI_VS_PLAYER;
+          this.#gameMode = GAME_MODE.AI_VS_HUMAN;
         }
         if (playerA === "ai" && playerB === "ai") {
           this.#gameMode = GAME_MODE.AI_VS_AI;
@@ -234,12 +263,15 @@ class GameBoard {
   #minimax(currentBoard, currentMark, humanMark, aiMark) {
     const availableCellIndexes = this.#getAvailableCells(currentBoard);
     if (this.#isRoundWinner(currentBoard, aiMark)) {
+      console.log("first");
       return { score: 1 };
     }
     if (this.#isRoundWinner(currentBoard, humanMark)) {
+      console.log("second");
       return { score: -1 };
     }
     if (availableCellIndexes.length === 0) {
+      console.log("tie");
       return { score: 0 };
     }
 
@@ -250,6 +282,10 @@ class GameBoard {
       humanMark,
       aiMark
     );
+    if (availableCellIndexes.length === 8) {
+      console.log(currentBoard);
+      console.log(allPlayTestsInfo);
+    }
 
     return this.#findBestTestPlay(
       allPlayTestsInfo,
@@ -258,6 +294,7 @@ class GameBoard {
       aiMark
     );
   }
+
   #getAllTestPlayInfoForEmptyCells(
     availableCellIndexes,
     currentBoard,
@@ -274,7 +311,7 @@ class GameBoard {
         currentMark === humanMark ? aiMark : humanMark,
         humanMark,
         aiMark
-      );
+      ).score;
       currentBoard[availableCellIndex] = "";
       allPlayTestsInfo.push(currentPlayTextInfo);
     }
