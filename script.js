@@ -1,7 +1,16 @@
+"use strict";
 const PLAYER_A = "x";
 const PLAYER_B = "o";
 const CELLS_NUMBER = 9;
 const INFINITY = 10000;
+
+const GAME_MODE = {
+  AI_VS_PLAYER: 1,
+  AI_VS_AI: 2,
+  PLAYER_VS_AI: 3,
+  PLAYER_VS_PLAYER: 4,
+};
+
 class Player {
   #name;
   #symbol;
@@ -44,6 +53,7 @@ class GameBoard {
   #roundsNumber = 1;
   #gameOver = false;
   #roundOver = false;
+  #gameMode = GAME_MODE.PLAYER_VS_PLAYER;
 
   #currentPlayer = this.#playerA;
   constructor() {
@@ -96,6 +106,7 @@ class GameBoard {
         if (cell.textContent || this.#gameOver || this.#roundOver) {
           return;
         }
+        console.log(this.#gameMode);
         cell.textContent = this.#currentPlayer.symbol;
         this.#board[cell.dataset.cellNumber] = this.#currentPlayer;
         this.#freeCells--;
@@ -103,15 +114,14 @@ class GameBoard {
           this.#nextRoundButton.classList.remove("hidden");
           this.#roundOver = true;
           this.#roundsNumber++;
-          if (this.#isTie()) {
-            this.#title.textContent = "TIE";
-          } else {
-            this.#currentPlayer.increaseScore();
-            this.#showScores();
-            if (this.#isGameOverSituation()) {
-              this.#nextRoundButton.classList.add("hidden");
-              this.#title.textContent = `${this.#currentPlayer.name} WON`;
-            }
+
+          if (!this.#isTie()) this.#currentPlayer.increaseScore();
+          this.#showScores();
+          if (this.#isGameOverSituation()) {
+            this.#nextRoundButton.classList.add("hidden");
+            this.#title.textContent = this.#isTie()
+              ? "TIE"
+              : `${this.#currentPlayer.name} WON`;
           }
         }
         this.#changePlayer();
@@ -181,9 +191,28 @@ class GameBoard {
   }
 
   #startHandle() {
-    document.querySelector("#start-game-btn").addEventListener("click", (e) => {
-      document.querySelector(".start-window").classList.add("hidden");
-    });
+    document
+      .querySelector(".start-window form")
+      .addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        document.querySelector(".start-window").classList.add("hidden");
+        const playerA = document.getElementById("player-a-select").value;
+        const playerB = document.getElementById("player-b-select").value;
+        console.log(playerA, playerB);
+        if (playerA === "ai" && playerB === "human") {
+          this.#gameMode = GAME_MODE.AI_VS_PLAYER;
+        }
+        if (playerA === "ai" && playerB === "ai") {
+          this.#gameMode = GAME_MODE.AI_VS_AI;
+        }
+        if (playerA === "human" && playerB === "ai") {
+          this.#gameMode = GAME_MODE.HUMAN_VS_AI;
+        }
+        if (playerA === "human" && playerB === "human") {
+          this.#gameMode = GAME_MODE.HUMAN_VS_HUMAN;
+        }
+      });
   }
 
   #getAvailableCells(board) {
@@ -203,14 +232,16 @@ class GameBoard {
   }
 
   #minimax(currentBoard, currentMark, humanMark, aiMark) {
-    const availableCellIndexes = getAvailableCells(currentBoard);
+    const availableCellIndexes = this.#getAvailableCells(currentBoard);
     if (this.#isRoundWinner(currentBoard, aiMark)) {
       return { score: 1 };
     }
     if (this.#isRoundWinner(currentBoard, humanMark)) {
       return { score: -1 };
     }
-    if (availableCellIndexes.length === 0) return { score: 0 };
+    if (availableCellIndexes.length === 0) {
+      return { score: 0 };
+    }
 
     const allPlayTestsInfo = this.#getAllTestPlayInfoForEmptyCells(
       availableCellIndexes,
@@ -249,6 +280,7 @@ class GameBoard {
     }
     return allPlayTestsInfo;
   }
+
   #findBestTestPlay(allPlayTestsInfo, currentMark, humanMark, aiMark) {
     let bestTestPlay = null;
     if (currentMark === aiMark) {
