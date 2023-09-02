@@ -114,7 +114,7 @@ button {
   height: 100vh;
   background-color: aliceblue;
   display: grid;
-  grid-template: auto auto auto / auto;
+  grid-template: auto 1fr / auto;
   justify-content: center;
   align-content: center;
   font-family: "Rubik Iso", cursive;
@@ -126,9 +126,43 @@ button {
 .start-window h1 {
   grid-area: 1/1;
 }
-.start-window h2 {
+.start-window form {
   grid-area: 2/1;
+  display: grid;
+  grid-template: repeat(3, 5rem) / repeat(3, auto);
+  justify-content: center;
+  align-content: flex-start;
+  align-items: flex-end;
+  row-gap: 1rem;
+  column-gap: 3rem;
 }
-.start-window #start-game-btn {
-  grid-area: 3/1;
+.start-window form #player-a-label {
+  grid-area: 1/1;
+  align-self: flex-end;
+}
+
+.start-window form h2 {
+  grid-area: 1/2/3/3;
+  align-self: center;
+}
+.start-window form h2 em {
+  font-size: 10rem;
+}
+
+.start-window form #player-b-label {
+  grid-area: 1/3;
+  align-self: flex-end;
+}
+
+.start-window form #player-a-select {
+  grid-area: 2/1 / 3/2;
+  align-self: flex-start;
+}
+.start-window form #player-b-select {
+  grid-area: 2/3 / 3/4;
+  align-self: flex-start;
+}
+.start-window form #start-game-btn {
+  grid-area: 3 / 1/ 4/ 4;
+  align-self: flex-start;
 }

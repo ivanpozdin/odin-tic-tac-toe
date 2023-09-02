@@ -34,8 +34,23 @@
       <button id="restart-btn">RESTART</button>
       <div class="start-window">
         <h1>TIC TAC TOE</h1>
-        <h2>PLAYER A <em>VS</em> PLAYER B</h2>
-        <button id="start-game-btn">START</button>
+        <form>
+          <label id="player-a-label" for="player-a-select">PLAYER A</label>
+          <select name="player-a" id="player-a-select">
+            <option value="human">HUMAN</option>
+            <option value="ai">AI</option>
+          </select>
+
+          <h2><em>VS</em></h2>
+
+          <label id="player-b-label" for="player-b-select">PLAYER B</label>
+          <select name="player-b" id="player-b-select">
+            <option value="human">HUMAN</option>
+            <option value="ai">AI</option>
+          </select>
+
+          <button type="submit" id="start-game-btn">START</button>
+        </form>
       </div>
     </div>
   </body>
