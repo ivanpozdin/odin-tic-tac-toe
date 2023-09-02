@@ -1,5 +1,13 @@
+@import url("https://fonts.googleapis.com/css2?family=Rubik+Iso&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=ADLaM+Display&display=swap");
+
 :root {
   font-size: 62.5%;
+  box-sizing: border-box;
+}
+
+button {
+  font-family: "ADLaM Display", cursive;
 }
 
 .body {
@@ -21,13 +29,16 @@
   grid-column-start: 1;
   grid-column-end: 4;
   text-align: center;
+  font-family: "Rubik Iso", cursive;
 }
 
 .score-player-a-container {
+  font-family: "ADLaM Display", cursive;
   grid-row-start: 2;
   grid-column-start: 1;
 }
 .score-player-b-container {
+  font-family: "ADLaM Display", cursive;
   grid-row-start: 2;
   grid-column-start: 3;
 }
@@ -44,6 +55,7 @@
 #round-number-container {
   grid-row-start: 3;
   grid-column-start: 2;
+  font-family: "ADLaM Display", cursive;
 }
 
 .board {
@@ -105,6 +117,7 @@
   grid-template: auto auto auto / auto;
   justify-content: center;
   align-content: center;
+  font-family: "Rubik Iso", cursive;
 }
 .start-window em {
   color: red;

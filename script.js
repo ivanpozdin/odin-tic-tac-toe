@@ -1,6 +1,7 @@
 const PLAYER_A = "x";
 const PLAYER_B = "o";
-
+const CELLS_NUMBER = 9;
+const INFINITY = 10000;
 class Player {
   #name;
   #symbol;
@@ -183,6 +184,92 @@ class GameBoard {
     document.querySelector("#start-game-btn").addEventListener("click", (e) => {
       document.querySelector(".start-window").classList.add("hidden");
     });
+  }
+
+  #getAvailableCells(board) {
+    const availableCells = [];
+    for (let i = 0; i < CELLS_NUMBER; i++) {
+      if (!board[i]) availableCells.push(i);
+    }
+    return availableCells;
+  }
+
+  #isRoundWinner(board, playerMark) {
+    return (
+      this.#doHave3InColumns(board) === playerMark ||
+      this.#doHave3InRows(board) === playerMark ||
+      this.#doHave3InDiagonals(board) === playerMark
+    );
+  }
+
+  #minimax(currentBoard, currentMark, humanMark, aiMark) {
+    const availableCellIndexes = getAvailableCells(currentBoard);
+    if (this.#isRoundWinner(currentBoard, aiMark)) {
+      return { score: 1 };
+    }
+    if (this.#isRoundWinner(currentBoard, humanMark)) {
+      return { score: -1 };
+    }
+    if (availableCellIndexes.length === 0) return { score: 0 };
+
+    const allPlayTestsInfo = this.#getAllTestPlayInfoForEmptyCells(
+      availableCellIndexes,
+      currentBoard,
+      currentMark,
+      humanMark,
+      aiMark
+    );
+
+    return this.#findBestTestPlay(
+      allPlayTestsInfo,
+      currentMark,
+      humanMark,
+      aiMark
+    );
+  }
+  #getAllTestPlayInfoForEmptyCells(
+    availableCellIndexes,
+    currentBoard,
+    currentMark,
+    humanMark,
+    aiMark
+  ) {
+    const allPlayTestsInfo = [];
+    for (const availableCellIndex of availableCellIndexes) {
+      const currentPlayTextInfo = { index: availableCellIndex };
+      currentBoard[availableCellIndex] = currentMark;
+      currentPlayTextInfo.score = this.#minimax(
+        currentBoard,
+        currentMark === humanMark ? aiMark : humanMark,
+        humanMark,
+        aiMark
+      );
+      currentBoard[availableCellIndex] = "";
+      allPlayTestsInfo.push(currentPlayTextInfo);
+    }
+    return allPlayTestsInfo;
+  }
+  #findBestTestPlay(allPlayTestsInfo, currentMark, humanMark, aiMark) {
+    let bestTestPlay = null;
+    if (currentMark === aiMark) {
+      let bestScore = -INFINITY;
+      for (const testPlayInfo of allPlayTestsInfo) {
+        if (testPlayInfo.score > bestScore) {
+          bestScore = testPlayInfo.score;
+          bestTestPlay = testPlayInfo;
+        }
+      }
+    }
+    if (currentMark === humanMark) {
+      let bestScore = INFINITY;
+      for (const testPlayInfo of allPlayTestsInfo) {
+        if (testPlayInfo.score < bestScore) {
+          bestScore = testPlayInfo.score;
+          bestTestPlay = testPlayInfo;
+        }
+      }
+    }
+    return bestTestPlay;
   }
 }
 
