@@ -2,7 +2,8 @@
 const PLAYER_A = "x";
 const PLAYER_B = "o";
 const CELLS_NUMBER = 9;
-const INFINITY = 10000;
+const INFINITY = 400;
+const PAUSE_MILLISECONDS_BEFORE_AI_MOVE = 2000;
 
 const GAME_MODE = {
   AI_VS_HUMAN: 1,
@@ -53,6 +54,7 @@ class GameBoard {
   #roundsNumber = 1;
   #gameOver = false;
   #roundOver = false;
+  #playerCanMove = true;
   #gameMode = GAME_MODE.PLAYER_VS_PLAYER;
 
   #currentPlayer = this.#playerA;
@@ -64,6 +66,7 @@ class GameBoard {
     this.#handleNextRound();
     this.#handleRestart();
     this.#startHandle();
+    this.#updateActivePlayerBorder();
   }
 
   #handleRestart() {
@@ -103,7 +106,12 @@ class GameBoard {
   #addMoveHandlers() {
     this.#cells.forEach((cell) =>
       cell.addEventListener("click", (e) => {
-        if (cell.textContent || this.#gameOver || this.#roundOver) {
+        if (
+          cell.textContent ||
+          this.#gameOver ||
+          this.#roundOver ||
+          !this.#playerCanMove
+        ) {
           return;
         }
         cell.textContent = this.#currentPlayer.symbol;
@@ -127,35 +135,39 @@ class GameBoard {
         }
         this.#changePlayer();
         if (!this.#gameMode === GAME_MODE.HUMAN_VS_AI) return;
-
-        const { index: aiMoveIndex } = this.#minimax(
-          this.#board,
-          this.#playerB,
-          this.#playerA,
-          this.#playerB
-        );
-        this.#board[aiMoveIndex] = this.#playerB;
-        this.#cells[aiMoveIndex].textContent = this.#playerB.symbol;
-        this.#freeCells--;
-        if (this.#isRoundOver(this.#board)) {
-          this.#nextRoundButton.classList.remove("hidden");
-          this.#roundOver = true;
-          this.#roundsNumber++;
-
-          if (!this.#isTie()) this.#currentPlayer.increaseScore();
-          this.#showScores();
-          if (this.#isGameOverSituation()) {
-            this.#nextRoundButton.classList.add("hidden");
-            this.#title.textContent = this.#isTie()
-              ? "TIE"
-              : `${this.#currentPlayer.name} WON`;
-          }
-          this.#changePlayer();
-          return;
-        }
-        this.#changePlayer();
+        this.#makeAIMoveAsPlayerB();
       })
     );
+  }
+
+  #makeAIMoveAsPlayerB() {
+    const { index: aiMoveIndex } = this.#minimax(
+      this.#board,
+      this.#playerB,
+      this.#playerA,
+      this.#playerB
+    );
+    this.#playerCanMove = false;
+    setTimeout(() => {
+      this.#board[aiMoveIndex] = this.#playerB;
+      this.#cells[aiMoveIndex].textContent = this.#playerB.symbol;
+      this.#freeCells--;
+      if (this.#isRoundOver(this.#board)) {
+        this.#nextRoundButton.classList.remove("hidden");
+        this.#roundOver = true;
+        if (!this.#isTie()) this.#currentPlayer.increaseScore();
+        this.#showScores();
+        if (this.#isGameOverSituation()) {
+          this.#nextRoundButton.classList.add("hidden");
+          this.#title.textContent = this.#isTie()
+            ? "TIE"
+            : `${this.#currentPlayer.name} WON`;
+        }
+        this.#roundsNumber++;
+      }
+      this.#changePlayer();
+      this.#playerCanMove = true;
+    }, PAUSE_MILLISECONDS_BEFORE_AI_MOVE);
   }
 
   #showRoundNumber() {
@@ -176,6 +188,28 @@ class GameBoard {
   #changePlayer() {
     this.#currentPlayer =
       this.#currentPlayer === this.#playerA ? this.#playerB : this.#playerA;
+
+    this.#updateActivePlayerBorder();
+  }
+
+  #updateActivePlayerBorder() {
+    if (this.#currentPlayer === this.#playerA) {
+      document
+        .querySelector(".score-player-b-container")
+        .classList.remove("active-player");
+
+      document
+        .querySelector(".score-player-a-container")
+        .classList.add("active-player");
+    } else {
+      document
+        .querySelector(".score-player-a-container")
+        .classList.remove("active-player");
+
+      document
+        .querySelector(".score-player-b-container")
+        .classList.add("active-player");
+    }
   }
 
   #isRoundOver(board) {
@@ -244,6 +278,8 @@ class GameBoard {
       });
   }
 
+  #drawBorderForActivePlayer() {}
+
   #getAvailableCells(board) {
     const availableCells = [];
     for (let i = 0; i < CELLS_NUMBER; i++) {
@@ -263,15 +299,12 @@ class GameBoard {
   #minimax(currentBoard, currentMark, humanMark, aiMark) {
     const availableCellIndexes = this.#getAvailableCells(currentBoard);
     if (this.#isRoundWinner(currentBoard, aiMark)) {
-      console.log("first");
       return { score: 1 };
     }
     if (this.#isRoundWinner(currentBoard, humanMark)) {
-      console.log("second");
       return { score: -1 };
     }
     if (availableCellIndexes.length === 0) {
-      console.log("tie");
       return { score: 0 };
     }
 
@@ -282,10 +315,6 @@ class GameBoard {
       humanMark,
       aiMark
     );
-    if (availableCellIndexes.length === 8) {
-      console.log(currentBoard);
-      console.log(allPlayTestsInfo);
-    }
 
     return this.#findBestTestPlay(
       allPlayTestsInfo,
