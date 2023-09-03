@@ -102,6 +102,9 @@ class GameBoard {
       this.#showRoundNumber();
       this.#currentPlayer = this.#playerA;
       this.#updateActivePlayerBorder();
+      if (this.#gameMode === GAME_MODE.AI_VS_HUMAN) {
+        this.#makeAIMoveAsPlayer(this.#playerA, this.#playerB);
+      }
     });
   }
 
@@ -167,6 +170,7 @@ class GameBoard {
   #showRoundNumber() {
     document.getElementById("round-number").textContent = this.#roundsNumber;
   }
+
   #showScores() {
     document.getElementById("score-player-a").textContent = this.#playerA.score;
     document.getElementById("score-player-b").textContent = this.#playerB.score;
@@ -254,6 +258,20 @@ class GameBoard {
     return null;
   }
 
+  #makeAIMoveAsPlayer(player, opponent) {
+    const { index: aiMoveIndex } = this.#minimax(
+      this.#board,
+      player,
+      opponent,
+      player
+    );
+    this.#playerCanMove = false;
+    setTimeout(() => {
+      this.#makeMoveToCell(this.#cells[aiMoveIndex]);
+      this.#playerCanMove = true;
+    }, PAUSE_MILLISECONDS_BEFORE_AI_MOVE);
+  }
+
   #startHandle() {
     document
       .querySelector(".start-window form")
@@ -261,6 +279,11 @@ class GameBoard {
         e.preventDefault();
         document.querySelector(".start-window").classList.add("hidden");
         this.#setGameMode();
+        this.#updateActivePlayerBorder();
+
+        if (this.#gameMode === GAME_MODE.AI_VS_HUMAN) {
+          this.#makeAIMoveAsPlayer(this.#playerA, this.#playerB);
+        }
       });
   }
 
