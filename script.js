@@ -3,7 +3,7 @@ const PLAYER_A = "x";
 const PLAYER_B = "o";
 const CELLS_NUMBER = 9;
 const INFINITY = 400;
-const PAUSE_MILLISECONDS_BEFORE_AI_MOVE = 2000;
+const PAUSE_MILLISECONDS_BEFORE_AI_MOVE = 400;
 
 const GAME_MODE = {
   AI_VS_HUMAN: 1,
@@ -116,30 +116,38 @@ class GameBoard {
         ) {
           return;
         }
-        cell.textContent = this.#currentPlayer.symbol;
-        this.#board[cell.dataset.cellNumber] = this.#currentPlayer;
-        this.#freeCells--;
-        if (this.#isRoundOver(this.#board)) {
-          this.#nextRoundButton.classList.remove("hidden");
-          this.#roundOver = true;
-          this.#roundsNumber++;
-
-          if (!this.#isTie()) this.#currentPlayer.increaseScore();
-          this.#showScores();
-          if (this.#isGameOverSituation()) {
-            this.#nextRoundButton.classList.add("hidden");
-            this.#title.textContent = this.#isTie()
-              ? "TIE"
-              : `${this.#currentPlayer.name} WON`;
-          }
-          this.#changePlayer();
-          return;
-        }
-        this.#changePlayer();
+        this.#makeMoveToCell(cell);
         if (!this.#gameMode === GAME_MODE.HUMAN_VS_AI) return;
         this.#makeAIMoveAsPlayerB();
       })
     );
+  }
+
+  #makeMoveToCell(cell) {
+    cell.textContent = this.#currentPlayer.symbol;
+    this.#board[cell.dataset.cellNumber] = this.#currentPlayer;
+    this.#freeCells--;
+    if (this.#isRoundOver(this.#board)) {
+      this.#processRoundOverSituation();
+      return;
+    }
+    this.#changePlayer();
+  }
+
+  #processRoundOverSituation() {
+    if (this.#isRoundOver(this.#board)) {
+      this.#nextRoundButton.classList.remove("hidden");
+      this.#roundOver = true;
+      if (!this.#isTie()) this.#currentPlayer.increaseScore();
+      this.#showScores();
+      if (this.#isGameOverSituation()) {
+        this.#nextRoundButton.classList.add("hidden");
+        this.#title.textContent = this.#isTie()
+          ? "TIE"
+          : `${this.#currentPlayer.name} WON`;
+      }
+      this.#roundsNumber++;
+    }
   }
 
   #makeAIMoveAsPlayerB() {
@@ -151,23 +159,7 @@ class GameBoard {
     );
     this.#playerCanMove = false;
     setTimeout(() => {
-      this.#board[aiMoveIndex] = this.#playerB;
-      this.#cells[aiMoveIndex].textContent = this.#playerB.symbol;
-      this.#freeCells--;
-      if (this.#isRoundOver(this.#board)) {
-        this.#nextRoundButton.classList.remove("hidden");
-        this.#roundOver = true;
-        if (!this.#isTie()) this.#currentPlayer.increaseScore();
-        this.#showScores();
-        if (this.#isGameOverSituation()) {
-          this.#nextRoundButton.classList.add("hidden");
-          this.#title.textContent = this.#isTie()
-            ? "TIE"
-            : `${this.#currentPlayer.name} WON`;
-        }
-        this.#roundsNumber++;
-      }
-      this.#changePlayer();
+      this.#makeMoveToCell(this.#cells[aiMoveIndex]);
       this.#playerCanMove = true;
     }, PAUSE_MILLISECONDS_BEFORE_AI_MOVE);
   }
@@ -228,7 +220,11 @@ class GameBoard {
 
   #doHave3InRows(board) {
     for (let i = 0; i <= 6; i += 3) {
-      if (board[i] === board[i + 1] && board[i] === board[i + 2]) {
+      if (
+        board[i] !== "" &&
+        board[i] === board[i + 1] &&
+        board[i] === board[i + 2]
+      ) {
         return board[i];
       }
     }
@@ -236,10 +232,10 @@ class GameBoard {
   }
 
   #doHave3InDiagonals(board) {
-    if (board[0] === board[4] && board[0] === board[8]) {
+    if (board[0] !== "" && board[0] === board[4] && board[0] === board[8]) {
       return board[0];
     }
-    if (board[2] === board[4] && board[2] === board[6]) {
+    if (board[2] !== "" && board[2] === board[4] && board[2] === board[6]) {
       return board[2];
     }
     return null;
@@ -247,7 +243,11 @@ class GameBoard {
 
   #doHave3InColumns(board) {
     for (let i = 0; i <= 2; i++) {
-      if (board[i] === board[i + 3] && board[i] === board[i + 6]) {
+      if (
+        board[i] !== "" &&
+        board[i] === board[i + 3] &&
+        board[i] === board[i + 6]
+      ) {
         return board[i];
       }
     }
