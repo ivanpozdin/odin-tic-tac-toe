@@ -108,7 +108,6 @@ class GameBoard {
       this.#currentPlayer = this.#nextStartPlayer;
       this.#nextStartPlayer = this.#getOpponentPlayerTo(this.#nextStartPlayer);
       this.#updateActivePlayerBorder();
-      console.log(this.#currentPlayer);
 
       if (
         this.#currentPlayer === this.#playerA &&
@@ -155,7 +154,6 @@ class GameBoard {
   }
 
   #processRoundOverSituation() {
-    console.log("hi", this.#gameMode);
     if (this.#isRoundOver(this.#board)) {
       this.#nextRoundButton.classList.remove("hidden");
       this.#roundOver = true;
@@ -269,7 +267,6 @@ class GameBoard {
       opponent,
       player
     );
-    console.log(aiMoveIndex, "making move...");
     this.#playerCanMove = false;
     setTimeout(() => {
       this.#makeMoveToCell(this.#cells[aiMoveIndex]);
