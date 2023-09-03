@@ -120,8 +120,9 @@ class GameBoard {
           return;
         }
         this.#makeMoveToCell(cell);
-        if (!this.#gameMode === GAME_MODE.HUMAN_VS_AI) return;
-        this.#makeAIMoveAsPlayerB();
+        if (this.#gameMode === GAME_MODE.HUMAN_VS_AI) {
+          this.#makeAIMoveAsPlayer(this.#playerB, this.#playerA);
+        }
       })
     );
   }
@@ -138,6 +139,7 @@ class GameBoard {
   }
 
   #processRoundOverSituation() {
+    console.log("hi", this.#gameMode);
     if (this.#isRoundOver(this.#board)) {
       this.#nextRoundButton.classList.remove("hidden");
       this.#roundOver = true;
@@ -151,20 +153,6 @@ class GameBoard {
       }
       this.#roundsNumber++;
     }
-  }
-
-  #makeAIMoveAsPlayerB() {
-    const { index: aiMoveIndex } = this.#minimax(
-      this.#board,
-      this.#playerB,
-      this.#playerA,
-      this.#playerB
-    );
-    this.#playerCanMove = false;
-    setTimeout(() => {
-      this.#makeMoveToCell(this.#cells[aiMoveIndex]);
-      this.#playerCanMove = true;
-    }, PAUSE_MILLISECONDS_BEFORE_AI_MOVE);
   }
 
   #showRoundNumber() {
@@ -277,10 +265,12 @@ class GameBoard {
       .querySelector(".start-window form")
       .addEventListener("submit", (e) => {
         e.preventDefault();
-        document.querySelector(".start-window").classList.add("hidden");
         this.#setGameMode();
+        if (this.#gameMode === GAME_MODE.AI_VS_AI) {
+          return alert("One player have to be HUMAN");
+        }
+        document.querySelector(".start-window").classList.add("hidden");
         this.#updateActivePlayerBorder();
-
         if (this.#gameMode === GAME_MODE.AI_VS_HUMAN) {
           this.#makeAIMoveAsPlayer(this.#playerA, this.#playerB);
         }
