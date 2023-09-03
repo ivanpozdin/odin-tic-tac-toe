@@ -100,6 +100,8 @@ class GameBoard {
       this.#title.textContent = "TIC TAC TOE";
       this.#roundOver = false;
       this.#showRoundNumber();
+      this.#currentPlayer = this.#playerA;
+      this.#updateActivePlayerBorder();
     });
   }
 
@@ -173,16 +175,15 @@ class GameBoard {
   #showRoundNumber() {
     document.getElementById("round-number").textContent = this.#roundsNumber;
   }
+  #showScores() {
+    document.getElementById("score-player-a").textContent = this.#playerA.score;
+    document.getElementById("score-player-b").textContent = this.#playerB.score;
+  }
 
   #isGameOverSituation() {
     return (
       this.#roundsNumber >= 3 && this.#playerA.score !== this.#playerB.score
     );
-  }
-
-  #showScores() {
-    document.getElementById("score-player-a").textContent = this.#playerA.score;
-    document.getElementById("score-player-b").textContent = this.#playerB.score;
   }
 
   #changePlayer() {
@@ -258,27 +259,28 @@ class GameBoard {
       .querySelector(".start-window form")
       .addEventListener("submit", (e) => {
         e.preventDefault();
-
         document.querySelector(".start-window").classList.add("hidden");
-        const playerA = document.getElementById("player-a-select").value;
-        const playerB = document.getElementById("player-b-select").value;
-
-        if (playerA === "ai" && playerB === "human") {
-          this.#gameMode = GAME_MODE.AI_VS_HUMAN;
-        }
-        if (playerA === "ai" && playerB === "ai") {
-          this.#gameMode = GAME_MODE.AI_VS_AI;
-        }
-        if (playerA === "human" && playerB === "ai") {
-          this.#gameMode = GAME_MODE.HUMAN_VS_AI;
-        }
-        if (playerA === "human" && playerB === "human") {
-          this.#gameMode = GAME_MODE.HUMAN_VS_HUMAN;
-        }
+        this.#setGameMode();
       });
   }
 
-  #drawBorderForActivePlayer() {}
+  #setGameMode() {
+    const playerA = document.getElementById("player-a-select").value;
+    const playerB = document.getElementById("player-b-select").value;
+
+    if (playerA === "ai" && playerB === "human") {
+      this.#gameMode = GAME_MODE.AI_VS_HUMAN;
+    }
+    if (playerA === "ai" && playerB === "ai") {
+      this.#gameMode = GAME_MODE.AI_VS_AI;
+    }
+    if (playerA === "human" && playerB === "ai") {
+      this.#gameMode = GAME_MODE.HUMAN_VS_AI;
+    }
+    if (playerA === "human" && playerB === "human") {
+      this.#gameMode = GAME_MODE.HUMAN_VS_HUMAN;
+    }
+  }
 
   #getAvailableCells(board) {
     const availableCells = [];
