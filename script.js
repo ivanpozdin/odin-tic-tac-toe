@@ -56,8 +56,12 @@ class GameBoard {
   #roundOver = false;
   #playerCanMove = true;
   #gameMode = GAME_MODE.PLAYER_VS_PLAYER;
+  #nextStartPlayer = this.#playerB;
 
   #currentPlayer = this.#playerA;
+  get #notCurrentPlayer() {
+    return this.#getOpponentPlayerTo(this.#currentPlayer);
+  }
   constructor() {
     for (let i = 0; i <= 8; i++) {
       this.#cells.push(document.querySelector(`.cell-${i}`));
@@ -83,6 +87,7 @@ class GameBoard {
       this.#playerA.resetScore();
       this.#playerB.resetScore();
       this.#currentPlayer = this.#playerA;
+      this.#nextStartPlayer = this.#playerB;
       this.#showRoundNumber();
       this.#showScores();
       document.querySelector(".start-window").classList.remove("hidden");
@@ -100,10 +105,22 @@ class GameBoard {
       this.#title.textContent = "TIC TAC TOE";
       this.#roundOver = false;
       this.#showRoundNumber();
-      this.#currentPlayer = this.#playerA;
+      this.#currentPlayer = this.#nextStartPlayer;
+      this.#nextStartPlayer = this.#getOpponentPlayerTo(this.#nextStartPlayer);
       this.#updateActivePlayerBorder();
-      if (this.#gameMode === GAME_MODE.AI_VS_HUMAN) {
-        this.#makeAIMoveAsPlayer(this.#playerA, this.#playerB);
+      console.log(this.#currentPlayer);
+
+      if (
+        this.#currentPlayer === this.#playerA &&
+        this.#gameMode === GAME_MODE.AI_VS_HUMAN
+      ) {
+        this.#makeAIMoveAsPlayer(this.#currentPlayer, this.#notCurrentPlayer);
+      }
+      if (
+        this.#currentPlayer === this.#playerB &&
+        this.#gameMode === GAME_MODE.HUMAN_VS_AI
+      ) {
+        this.#makeAIMoveAsPlayer(this.#currentPlayer, this.#notCurrentPlayer);
       }
     });
   }
@@ -120,9 +137,8 @@ class GameBoard {
           return;
         }
         this.#makeMoveToCell(cell);
-        if (this.#gameMode === GAME_MODE.HUMAN_VS_AI) {
-          this.#makeAIMoveAsPlayer(this.#playerB, this.#playerA);
-        }
+        if (this.#gameMode === GAME_MODE.HUMAN_VS_HUMAN) return;
+        this.#makeAIMoveAsPlayer(this.#currentPlayer, this.#notCurrentPlayer);
       })
     );
   }
@@ -253,6 +269,7 @@ class GameBoard {
       opponent,
       player
     );
+    console.log(aiMoveIndex, "making move...");
     this.#playerCanMove = false;
     setTimeout(() => {
       this.#makeMoveToCell(this.#cells[aiMoveIndex]);
@@ -383,6 +400,13 @@ class GameBoard {
       }
     }
     return bestTestPlay;
+  }
+
+  #getOpponentPlayerTo(player) {
+    if (player === this.#playerA) {
+      return this.#playerB;
+    }
+    return this.#playerA;
   }
 }
 
