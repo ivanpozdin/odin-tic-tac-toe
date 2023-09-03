@@ -311,12 +311,12 @@ class GameBoard {
     );
   }
 
-  #minimax(currentBoard, currentMark, humanMark, aiMark) {
+  #minimax(currentBoard, currentPlayer, opponent, player) {
     const availableCellIndexes = this.#getAvailableCells(currentBoard);
-    if (this.#isRoundWinner(currentBoard, aiMark)) {
+    if (this.#isRoundWinner(currentBoard, player)) {
       return { score: 1 };
     }
-    if (this.#isRoundWinner(currentBoard, humanMark)) {
+    if (this.#isRoundWinner(currentBoard, opponent)) {
       return { score: -1 };
     }
     if (availableCellIndexes.length === 0) {
@@ -326,35 +326,35 @@ class GameBoard {
     const allPlayTestsInfo = this.#getAllTestPlayInfoForEmptyCells(
       availableCellIndexes,
       currentBoard,
-      currentMark,
-      humanMark,
-      aiMark
+      currentPlayer,
+      opponent,
+      player
     );
 
     return this.#findBestTestPlay(
       allPlayTestsInfo,
-      currentMark,
-      humanMark,
-      aiMark
+      currentPlayer,
+      opponent,
+      player
     );
   }
 
   #getAllTestPlayInfoForEmptyCells(
     availableCellIndexes,
     currentBoard,
-    currentMark,
-    humanMark,
-    aiMark
+    currentPlayer,
+    opponent,
+    player
   ) {
     const allPlayTestsInfo = [];
     for (const availableCellIndex of availableCellIndexes) {
       const currentPlayTextInfo = { index: availableCellIndex };
-      currentBoard[availableCellIndex] = currentMark;
+      currentBoard[availableCellIndex] = currentPlayer;
       currentPlayTextInfo.score = this.#minimax(
         currentBoard,
-        currentMark === humanMark ? aiMark : humanMark,
-        humanMark,
-        aiMark
+        currentPlayer === opponent ? player : opponent,
+        opponent,
+        player
       ).score;
       currentBoard[availableCellIndex] = "";
       allPlayTestsInfo.push(currentPlayTextInfo);
@@ -362,9 +362,9 @@ class GameBoard {
     return allPlayTestsInfo;
   }
 
-  #findBestTestPlay(allPlayTestsInfo, currentMark, humanMark, aiMark) {
+  #findBestTestPlay(allPlayTestsInfo, currentPlayer, opponent, player) {
     let bestTestPlay = null;
-    if (currentMark === aiMark) {
+    if (currentPlayer === player) {
       let bestScore = -INFINITY;
       for (const testPlayInfo of allPlayTestsInfo) {
         if (testPlayInfo.score > bestScore) {
@@ -373,7 +373,7 @@ class GameBoard {
         }
       }
     }
-    if (currentMark === humanMark) {
+    if (currentPlayer === opponent) {
       let bestScore = INFINITY;
       for (const testPlayInfo of allPlayTestsInfo) {
         if (testPlayInfo.score < bestScore) {
